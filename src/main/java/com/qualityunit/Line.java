@@ -92,4 +92,5 @@ abstract public class Line {
     public char getResponseType() {
         return responseType;
     }
+
 }

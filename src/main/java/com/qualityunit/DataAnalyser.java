@@ -1,13 +1,13 @@
 package com.qualityunit;
 
 
-import java.io.*;
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class DataAnalyser {
 
@@ -21,33 +21,18 @@ public class DataAnalyser {
     }
 
     private DataAnalyser(String fileName) {
-        File file = getFile(fileName);
-        processFile(file);
+        processFile(fileName);
     }
 
-    private File getFile(String fileName) {
-        Objects.requireNonNull(fileName);
-        URL fileUrl = getFileUrl(fileName);
-        return new File(fileUrl.getFile());
-    }
-
-    private URL getFileUrl(String fileName) {
-        URL fileUrl = getClass().getClassLoader().getResource(fileName);
-        if (fileUrl == null) {
-            throw new DataAnalyserException("Wrong file path");
-        }
-        return fileUrl;
-    }
-
-    private void processFile(File file) {
+    private void processFile(String fileName) {
         String currentLine;
         int actualCountOfLine = 0;
 
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/" + fileName)))) {
             currentLine = bufferedReader.readLine();
             int parsedCountOfLines = parseCountOfLines(currentLine);
             setCountOfLines(parsedCountOfLines);
-            while ((currentLine = bufferedReader.readLine()) != null && actualCountOfLine <= countOfLines) {
+            while (actualCountOfLine < countOfLines && (currentLine = bufferedReader.readLine()) != null) {
                 String splitLine[] = currentLine.split(" ");
                 if (splitLine[0].equals("C")) {
                     LineC lineC = parseLineC(splitLine);
@@ -60,11 +45,9 @@ public class DataAnalyser {
                 }
                 actualCountOfLine++;
             }
-            validateActualCountOfLines(actualCountOfLine);//todo if try one more readLine in case if actualCout>Count and actualCunt<Count
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            throw new DataAnalyserException("Wrong file path");
+            validateActualCountOfLines(actualCountOfLine, bufferedReader.readLine() != null);
+        } catch (NullPointerException | IOException e) {
+            throw new DataAnalyserException("Wrong filename", e);
         }
     }
 
@@ -95,29 +78,39 @@ public class DataAnalyser {
     }
 
     private LineD parseLineD(String[] splitLine) {
-        return null;//todo
+        LineD lineD = new LineD();
+        parseService(splitLine[1], lineD);
+        parseQuestion(splitLine[2], lineD);
+        parseResponseType(splitLine[3], lineD);
+        parseResponsePeriod(splitLine[4], lineD);
+        //  System.out.println(lineD);//todo delete
+        return lineD;
     }
 
 
     private void parseService(String s, Line line) {
-        String service[] = s.split(".");
-        line.setServiceId(Byte.parseByte(service[0]));
-        if (service.length == 2) {
-            line.setServiceVariationId(Byte.parseByte(service[1]));
-        } else if (service.length > 2) {
-            throw new DataAnalyserException("Invalid service value " + s);
+        if (!s.equals("*")) {
+            String service[] = s.split("\\.");
+            line.setServiceId(Byte.parseByte(service[0]));
+            if (service.length == 2) {
+                line.setServiceVariationId(Byte.parseByte(service[1]));
+            } else if (service.length > 2) {
+                throw new DataAnalyserException("Invalid service value " + s);
+            }
         }
     }
 
     private void parseQuestion(String s, Line line) {
-        String question[] = s.split(".");
-        line.setQuestionTypeId(Byte.parseByte(question[0]));
-        if (question.length >= 2) {
-            line.setQuestionCategoryId(Byte.parseByte(question[1]));
-            if (question.length == 3) {
-                line.setQuestionSubCategoryId(Byte.parseByte(question[2]));
-            } else if (question.length > 3) {
-                throw new DataAnalyserException("Invalid question value " + s);
+        if (!s.equals("*")) {
+            String question[] = s.split("\\.");
+            line.setQuestionTypeId(Byte.parseByte(question[0]));
+            if (question.length >= 2) {
+                line.setQuestionCategoryId(Byte.parseByte(question[1]));
+                if (question.length == 3) {
+                    line.setQuestionSubCategoryId(Byte.parseByte(question[2]));
+                } else if (question.length > 3) {
+                    throw new DataAnalyserException("Invalid question value " + s);
+                }
             }
         }
     }
@@ -133,21 +126,52 @@ public class DataAnalyser {
 
     private LocalDate parseDate(String date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d.MM.yyyy");
-        LocalDate parsedDate = LocalDate.parse(date, formatter);
-        return parsedDate;
+        return LocalDate.parse(date, formatter);
     }
 
     private void parseWaitingTimeInMinutes(String s, LineC lineC) {
         lineC.setWaitingTimeInMinutes(Integer.parseInt(s));
     }
 
-    private void printAverageWaitingTime(LineD lineD) {
-        //todo
+    private void parseResponsePeriod(String s, LineD lineD) {
+        String responsePeriod[] = s.split("-");
+        LocalDate parsedDateFrom = parseDate(responsePeriod[0]);
+        LocalDate parsedDateTo = null;
+        if (responsePeriod.length == 2) {
+            parsedDateTo = parseDate(responsePeriod[1]);
+        } else if (responsePeriod.length > 2) {
+            throw new DataAnalyserException("Invalid response period " + s);
+        }
+        lineD.setDateFrom(parsedDateFrom);
+        lineD.setDateTo(parsedDateTo == null ? parsedDateFrom : parsedDateTo);
+
     }
 
-    private void validateActualCountOfLines(int actualCountOfLine) {
-        //todo
-        System.out.println(lines);
+    private void printAverageWaitingTime(LineD lineD) {
+
+        Double averageWaitingTime = lines.stream()
+                .filter(lineC -> lineD.getServiceId() == 0 || lineD.getServiceId() == lineC.getServiceId())
+                .filter(lineC -> lineD.getServiceVariationId() == 0 || lineD.getServiceVariationId() == lineC.getServiceVariationId())
+                .filter(lineC -> lineD.getQuestionTypeId() == 0 || lineD.getQuestionTypeId() == lineC.getQuestionTypeId())
+                .filter(lineC -> lineD.getQuestionCategoryId() == 0 || lineD.getQuestionCategoryId() == lineC.getQuestionCategoryId())
+                .filter(lineC -> lineD.getQuestionSubCategoryId() == 0 || lineD.getQuestionSubCategoryId() == lineC.getQuestionSubCategoryId())
+                .filter(lineC -> lineD.getResponseType() == lineC.getResponseType())
+                .filter(lineC -> (!(lineC.getResponseDate().isBefore(lineD.getDateFrom()) || lineC.getResponseDate().isAfter(lineD.getDateTo()))))
+                .mapToInt(LineC::getWaitingTimeInMinutes)
+                .average()
+                .orElse(-1);
+        int result = averageWaitingTime.intValue();
+        System.out.println(result == -1 ? "-" : result);
+
+    }
+
+    private void validateActualCountOfLines(int actualCountOfLine, boolean isLineLeft) {
+        if (isLineLeft) {
+            throw new DataAnalyserException("Number of lines is lager than stated");
+        }
+        if (actualCountOfLine < countOfLines) {
+            throw new DataAnalyserException("Number of lines is smaller than stated");
+        }
     }
 
 }

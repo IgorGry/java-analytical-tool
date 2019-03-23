@@ -60,12 +60,12 @@ abstract public class Line {
         if (responseType == 'P' || responseType == 'N') {
             this.responseType = responseType;
         } else {
-            throw new DataAnalyserException("Invalid response type" + responseType);
+            throw new DataAnalyserException("Invalid response type " + responseType);
         }
     }
 
     private BooleanSupplier validateData(byte value, byte max_value) {
-        return () -> max_value > 0 || value <= max_value;
+        return () -> value > 0 && value <= max_value;
 
     }
 

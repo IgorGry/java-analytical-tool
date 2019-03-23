@@ -16,7 +16,7 @@ public class DataAnalyser {
     private List<LineC> lines = new ArrayList<>();
 
 
-    public static DataAnalyser from(String fileName) {
+    public static DataAnalyser fromResourceFolder(String fileName) {
         return new DataAnalyser(fileName);
     }
 
@@ -52,8 +52,7 @@ public class DataAnalyser {
     }
 
     private int parseCountOfLines(String firstLine) {
-        int countOfLines = Integer.parseInt(firstLine);
-        return countOfLines;
+        return Integer.parseInt(firstLine);
     }
 
     private void setCountOfLines(int countOfLines) {
@@ -83,7 +82,6 @@ public class DataAnalyser {
         parseQuestion(splitLine[2], lineD);
         parseResponseType(splitLine[3], lineD);
         parseResponsePeriod(splitLine[4], lineD);
-        //  System.out.println(lineD);//todo delete
         return lineD;
     }
 
@@ -150,6 +148,7 @@ public class DataAnalyser {
     private void printAverageWaitingTime(LineD lineD) {
 
         Double averageWaitingTime = lines.stream()
+                .parallel()
                 .filter(lineC -> lineD.getServiceId() == 0 || lineD.getServiceId() == lineC.getServiceId())
                 .filter(lineC -> lineD.getServiceVariationId() == 0 || lineD.getServiceVariationId() == lineC.getServiceVariationId())
                 .filter(lineC -> lineD.getQuestionTypeId() == 0 || lineD.getQuestionTypeId() == lineC.getQuestionTypeId())

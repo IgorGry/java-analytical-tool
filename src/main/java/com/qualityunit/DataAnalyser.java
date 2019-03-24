@@ -61,7 +61,7 @@ public class DataAnalyser {
     }
 
     private void validateCountOfLines(int countOfLines) {
-        if (countOfLines < 0 || countOfLines > 100_000) {
+        if (countOfLines < 0 || countOfLines > MAX_NUMBER_OF_LINES) {
             throw new DataAnalyserException("Invalid count of lines");
         }
     }

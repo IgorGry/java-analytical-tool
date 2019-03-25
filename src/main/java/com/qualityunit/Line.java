@@ -1,7 +1,5 @@
 package com.qualityunit;
 
-import java.util.function.BooleanSupplier;
-
 abstract public class Line {
     private static final byte MAX_NUMBER_OF_SERVICES = 10;
     private static final byte MAX_NUMBER_OF_SERVICE_VARIATIONS = 3;
@@ -17,7 +15,7 @@ abstract public class Line {
 
 
     public void setServiceId(byte serviceId) {
-        if (validateData(serviceId, MAX_NUMBER_OF_SERVICES).getAsBoolean()) {
+        if (validateData(serviceId, MAX_NUMBER_OF_SERVICES)) {
             this.serviceId = serviceId;
         } else {
             throw new DataAnalyserException("Invalid service_id " + serviceId);
@@ -25,7 +23,7 @@ abstract public class Line {
     }
 
     public void setServiceVariationId(byte serviceVariationId) {
-        if (validateData(serviceVariationId, MAX_NUMBER_OF_SERVICE_VARIATIONS).getAsBoolean()) {
+        if (validateData(serviceVariationId, MAX_NUMBER_OF_SERVICE_VARIATIONS)) {
             this.serviceVariationId = serviceVariationId;
         } else {
             throw new DataAnalyserException("Invalid service_variation_id " + serviceVariationId);
@@ -33,7 +31,7 @@ abstract public class Line {
     }
 
     public void setQuestionTypeId(byte questionTypeId) {
-        if (validateData(questionTypeId, MAX_NUMBER_OF_QUESTION_TYPES).getAsBoolean()) {
+        if (validateData(questionTypeId, MAX_NUMBER_OF_QUESTION_TYPES)) {
             this.questionTypeId = questionTypeId;
         } else {
             throw new DataAnalyserException("Invalid question_type_id " + questionTypeId);
@@ -41,7 +39,7 @@ abstract public class Line {
     }
 
     public void setQuestionCategoryId(byte questionCategoryId) {
-        if (validateData(questionCategoryId, MAX_NUMBER_OF_QUESTION_TYPE_CATEGORIES).getAsBoolean()) {
+        if (validateData(questionCategoryId, MAX_NUMBER_OF_QUESTION_TYPE_CATEGORIES)) {
             this.questionCategoryId = questionCategoryId;
         } else {
             throw new DataAnalyserException("Invalid question_category_id " + questionCategoryId);
@@ -49,7 +47,7 @@ abstract public class Line {
     }
 
     public void setQuestionSubCategoryId(byte questionSubCategoryId) {
-        if (validateData(questionSubCategoryId, MAX_NUMBER_OF_QUESTION_TYPE_CATEGORY_SUBTYPES).getAsBoolean()) {
+        if (validateData(questionSubCategoryId, MAX_NUMBER_OF_QUESTION_TYPE_CATEGORY_SUBTYPES)) {
             this.questionSubCategoryId = questionSubCategoryId;
         } else {
             throw new DataAnalyserException("Invalid question_sub-category_id " + questionSubCategoryId);
@@ -64,8 +62,8 @@ abstract public class Line {
         }
     }
 
-    private BooleanSupplier validateData(byte value, byte max_value) {
-        return () -> value > 0 && value <= max_value;
+    private boolean validateData(byte value, byte max_value) {
+        return value > 0 && value <= max_value;
 
     }
 
@@ -91,6 +89,18 @@ abstract public class Line {
 
     public char getResponseType() {
         return responseType;
+    }
+
+    @Override
+    public String toString() {
+        return
+                getServiceId() +
+                        (getServiceVariationId() == 0 ? "" : "." + getServiceVariationId()) +
+                        ", " + getQuestionTypeId() +
+                        (getQuestionCategoryId() == 0 ? "" : "." + getQuestionCategoryId()) +
+                        (getQuestionSubCategoryId() == 0 ? "" : "." + getQuestionSubCategoryId()) +
+                        ", " + getResponseType();
+
     }
 
 }

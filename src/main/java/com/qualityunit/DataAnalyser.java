@@ -28,7 +28,6 @@ public class DataAnalyser {
 
     private void processFile(String fileName) {
         Objects.requireNonNull(fileName);
-
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(getResourceAsStream(fileName)))) {
             String currentLine = bufferedReader.readLine();
             int actualCountOfLine = 0;
@@ -95,10 +94,9 @@ public class DataAnalyser {
         return lineD;
     }
 
-
     private void parseService(String s, Line line) {
-        if (!s.equals("*")) {
-            String service[] = s.split("\\.");
+        if (!"*".equals(s)) {
+            String[] service = s.split("\\.");
             line.setServiceId(Byte.parseByte(service[0]));
             if (service.length == 2) {
                 line.setServiceVariationId(Byte.parseByte(service[1]));
@@ -109,8 +107,8 @@ public class DataAnalyser {
     }
 
     private void parseQuestion(String s, Line line) {
-        if (!s.equals("*")) {
-            String question[] = s.split("\\.");
+        if (!"*".equals(s)) {
+            String[] question = s.split("\\.");
             line.setQuestionTypeId(Byte.parseByte(question[0]));
             if (question.length >= 2) {
                 line.setQuestionCategoryId(Byte.parseByte(question[1]));
@@ -142,7 +140,7 @@ public class DataAnalyser {
     }
 
     private void parseResponsePeriod(String s, LineD lineD) {
-        String responsePeriod[] = s.split("-");
+        String[] responsePeriod = s.split("-");
         LocalDate parsedDateFrom = parseDate(responsePeriod[0]);
         LocalDate parsedDateTo = null;
         if (responsePeriod.length == 2) {
@@ -152,7 +150,6 @@ public class DataAnalyser {
         }
         lineD.setDateFrom(parsedDateFrom);
         lineD.setDateTo(parsedDateTo == null ? parsedDateFrom : parsedDateTo);
-
     }
 
     private void printAverageWaitingTime(LineD lineD) {
@@ -171,7 +168,6 @@ public class DataAnalyser {
                 .orElse(-1);
         int result = averageWaitingTime.intValue();
         System.out.println(result == -1 ? "-" : result);
-
     }
 
     private void validateActualCountOfLines(int actualCountOfLine, boolean isLineLeft) {

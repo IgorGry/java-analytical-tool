@@ -25,12 +25,7 @@ public class LineC extends Line {
     @Override
     public String toString() {
         return
-                "{" + super.getServiceId() +
-                        (super.getServiceVariationId() == 0 ? "" : "." + super.getServiceVariationId()) +
-                        ", " + super.getQuestionTypeId() +
-                        (super.getQuestionCategoryId() == 0 ? "" : "." + super.getQuestionCategoryId()) +
-                        (super.getQuestionSubCategoryId() == 0 ? "" : "." + super.getQuestionSubCategoryId()) +
-                        ", " + super.getResponseType() +
+                "{" + super.toString() +
                         ", " + responseDate +
                         ", " + waitingTimeInMinutes +
                         "}" + "\n";

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DataAnalyser {
 
@@ -27,6 +28,7 @@ public class DataAnalyser {
     private void processFile(String fileName) {
         String currentLine;
         int actualCountOfLine = 0;
+        Objects.requireNonNull(fileName);
 
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/" + fileName)))) {
             currentLine = bufferedReader.readLine();
@@ -46,7 +48,7 @@ public class DataAnalyser {
                 actualCountOfLine++;
             }
             validateActualCountOfLines(actualCountOfLine, bufferedReader.readLine() != null);
-        } catch (NullPointerException | IOException e) {
+        } catch (IOException e) {
             throw new DataAnalyserException("Wrong filename", e);
         }
     }

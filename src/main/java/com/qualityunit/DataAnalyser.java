@@ -14,6 +14,9 @@ import java.util.Objects;
 public class DataAnalyser {
 
     private static final int MAX_NUMBER_OF_LINES = 100_000;
+    private static final int NUMBER_OF_ATTRIBUTES_IN_LINE_C = 6;
+    private static final int NUMBER_OF_ATTRIBUTES_IN_LINE_D = 5;
+
     private int countOfLines;
     private List<LineC> lines = new ArrayList<>();
 
@@ -36,9 +39,11 @@ public class DataAnalyser {
             while (actualCountOfLine < countOfLines && (currentLine = bufferedReader.readLine()) != null) {
                 String[] splitLine = currentLine.split(" ");
                 if (splitLine[0].equals("C")) {
+                    validateNumberOfAttributesInLine(splitLine, NUMBER_OF_ATTRIBUTES_IN_LINE_C);
                     LineC lineC = parseLineC(splitLine);
                     lines.add(lineC);
                 } else if (splitLine[0].equals("D")) {
+                    validateNumberOfAttributesInLine(splitLine, NUMBER_OF_ATTRIBUTES_IN_LINE_D);
                     LineD lineD = parseLineD(splitLine);
                     printAverageWaitingTime(lineD);
                 } else {
@@ -49,6 +54,12 @@ public class DataAnalyser {
             validateActualCountOfLines(actualCountOfLine, bufferedReader.readLine() != null);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void validateNumberOfAttributesInLine(String[] splitLine, int number_of_attributes) {
+        if (splitLine.length > number_of_attributes) {
+            throw new DataAnalyserException("Wrong number of attributes line " + splitLine.length);
         }
     }
 

@@ -184,6 +184,29 @@ public class DataAnalyserTest {
         }
     }
 
+    @Test
+    public void testDataAnalyserInvalidAttributesNumberInLineC() {
+        try {
+            DataAnalyser.fromResourceFolder("test_invalid_number_of_attributes_LineC.txt");
+            fail("Exception was't thrown");
+        } catch (Exception e) {
+            assertEquals(DataAnalyserException.class, e.getClass());
+            assertEquals(("Wrong number of attributes line 7"), e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDataAnalyserInvalidAttributesNumberInLineD() {
+        try {
+            DataAnalyser.fromResourceFolder("test_invalid_number_of_attributes_LineD.txt");
+            fail("Exception was't thrown");
+        } catch (Exception e) {
+            assertEquals(DataAnalyserException.class, e.getClass());
+            assertEquals(("Wrong number of attributes line 6"), e.getMessage());
+
+        }
+    }
+
     @Ignore()
     @Test
     public void testDataAnalyserFromMaxLinesFile() {

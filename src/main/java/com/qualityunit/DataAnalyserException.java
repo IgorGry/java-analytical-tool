@@ -6,8 +6,4 @@ public class DataAnalyserException extends RuntimeException {
         super(message);
     }
 
-    public DataAnalyserException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

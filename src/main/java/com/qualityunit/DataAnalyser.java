@@ -3,6 +3,7 @@ package com.qualityunit;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -26,16 +27,15 @@ public class DataAnalyser {
     }
 
     private void processFile(String fileName) {
-        String currentLine;
-        int actualCountOfLine = 0;
         Objects.requireNonNull(fileName);
 
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/" + fileName)))) {
-            currentLine = bufferedReader.readLine();
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(getResourceAsStream(fileName)))) {
+            String currentLine = bufferedReader.readLine();
+            int actualCountOfLine = 0;
             int parsedCountOfLines = parseCountOfLines(currentLine);
             setCountOfLines(parsedCountOfLines);
             while (actualCountOfLine < countOfLines && (currentLine = bufferedReader.readLine()) != null) {
-                String splitLine[] = currentLine.split(" ");
+                String[] splitLine = currentLine.split(" ");
                 if (splitLine[0].equals("C")) {
                     LineC lineC = parseLineC(splitLine);
                     lines.add(lineC);
@@ -49,8 +49,16 @@ public class DataAnalyser {
             }
             validateActualCountOfLines(actualCountOfLine, bufferedReader.readLine() != null);
         } catch (IOException e) {
-            throw new DataAnalyserException("Wrong filename", e);
+            e.printStackTrace();
         }
+    }
+
+    private InputStream getResourceAsStream(String fileName) {
+        InputStream inputStream = this.getClass().getResourceAsStream("/" + fileName);
+        if (inputStream == null) {
+            throw new DataAnalyserException("Wrong filename");
+        }
+        return inputStream;
     }
 
     private int parseCountOfLines(String firstLine) {
